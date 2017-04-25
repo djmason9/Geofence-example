@@ -1,0 +1,7 @@
+<Alloy>
+    <Window layout="vertical">
+        <Button top="100" onClick="locBTNClicked" >Get location</Button>
+        <Label id="lat" />
+        <Label id="lon" />
+    </Window>
+</Alloy>
