@@ -1,18 +1,56 @@
-Welcome to your Appcelerator Titanium Mobile Project
+Geofence Test/Demo
 
-This is a blank project.  Start by editing your application's app.js to 
-make your first mobile project using Titanium.
+1. Using a HelloWorld app and using the instructions in the [**Geofencing Module**](http://docs.appcelerator.com/platform/latest/#!/api/Modules.Geofence) API docs.
 
+  > Note that the events to listen for are *enterregions* and *exitregions*. The online docs have a typo and are missing the 's'
 
+2. Register for iOS8 local notifications as per [**this**](http://docs.appcelerator.com/platform/latest/#!/guide/iOS_Local_Notifications) guide using this code:
 
-----------------------------------
-Stuff our legal folk make us say:
+  ```javascript
+  // Check if the device is running iOS 8 or later, before registering for local notifications
+  if (Ti.Platform.name == "iPhone OS" && parseInt(Ti.Platform.version.split(".")[0]) >= 8) {
+      Ti.App.iOS.registerUserNotificationSettings({
+  	    types: [
+              Ti.App.iOS.USER_NOTIFICATION_TYPE_ALERT,
+              Ti.App.iOS.USER_NOTIFICATION_TYPE_SOUND,
+              Ti.App.iOS.USER_NOTIFICATION_TYPE_BADGE
+          ]
+      });
+  }
+  ```
 
-Appcelerator, Appcelerator Titanium and associated marks and logos are 
-trademarks of Appcelerator, Inc. 
+3. Since we want to use the device GPS location, we need to follow guide [**here**](http://docs.appcelerator.com/platform/latest/#!/guide/Tracking_Position_and_Heading) and modify tiapp.xml for iOS with
 
-Titanium is Copyright (c) 2008-2016 by Appcelerator, Inc. All Rights Reserved.
+  ```javasript
+  <key>NSLocationAlwaysUsageDescription</key>
+  <string>
+      Geolocation Test
+  </string>
+  <key>NSLocationUsageDescription</key>
+  <string>
+      Get Current Location
+  </string>
+  ```
 
-Titanium is licensed under the Apache Public License (Version 2). Please
-see the LICENSE file for the full license.
+4. I think I need to trigger the GPS to enable and Obtain the Current GPS Position using the guide [here](http://docs.appcelerator.com/platform/latest/#!/guide/Tracking_Position_and_Heading-section-29004915_TrackingPositionandHeading-ObtaintheCurrentGPSPosition) using the following code:
 
+  ```javascript
+  if (Ti.Geolocation.locationServicesEnabled) {
+      Titanium.Geolocation.purpose = 'Get Current Location';
+      Titanium.Geolocation.getCurrentPosition(function(e) {
+          if (e.error) {
+              Ti.API.error('Error: ' + e.error);
+          } else {
+              Ti.API.info(e.coords);
+          }
+      });
+  } else {
+      alert('Please enable location services');
+  }
+  ```
+
+5. Use the iPhone simulator's Debug->Location menu item to set and change the GPS coordinate of the simulator. By doing so, you should receive  *enterregions* and *exitregions* events logged in the console. If you minimize or exit the app and change your GPS to exit or enter the region you will also see the local notification as follows:
+
+  ![](http://i.imgur.com/GdrVC7x.png)
+
+6. Seems like I need to exit the app before changing the GPS coordinate in the simulator in order for local notifications to show up
